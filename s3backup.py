@@ -36,8 +36,8 @@ def main(argv):
         print "No bucket provided"
         sys.exit(0)
 
-    if not os.path.isfile("../config.ini"):
-        print "Missing config file ../config.ini"
+    if not os.path.isfile("../s3backup.ini"):
+        print "Missing config file ../s3backup.ini"
 
         print "Sample config:"
         print ""
@@ -61,7 +61,7 @@ def main(argv):
         return dict1
 
     Config = ConfigParser.ConfigParser()
-    Config.read("../config.ini")
+    Config.read("../s3backup.ini")
 
     def getConfig(config):
         try:
