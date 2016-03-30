@@ -1,0 +1,5 @@
+libraries:
+- name: pycrypto
+  version: latest
+- name: boto3
+  version: latest
