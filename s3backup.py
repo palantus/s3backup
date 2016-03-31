@@ -7,26 +7,36 @@ import getopt
 from program import backup as backup
 from program import manage as manage
 
+def printOptions():
+    print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
+    print ''
+    print 'Parameters:'
+    print '-f, --folder   source folder to back up'
+    print '-b, --bucket   S3 bucket to back up to'
+    print '-a, --action   action to perform:'
+    print '                 "backup": backs up data'
+    print '                 "restore": restores data'
+    print '                 "list": lists all backups on S3'
+    print '-c             run action without any prompts (useful for running in cron jobs).'
+
 def main(argv):
     sourcefolder = ""
     destbucket = ""
     action = "";
+    confirmAction = True
     try:
-        opts, args = getopt.getopt(argv,"hf:b:a:",["folder=","bucket=","action="])
+        opts, args = getopt.getopt(argv,"hf:b:a:c",["folder=","bucket=","action="])
     except getopt.GetoptError:
-        print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
-        print "Action can be: backup, restore, list"
-        print '  backup: backs up data'
-        print '  restore: restores data'
-        print '  list: lists all backups on S3'
+        printOptions()
         sys.exit(2)
+
+    if len(opts) == 0:
+        printOptions()
+        sys.exit()
+
     for opt, arg in opts:
         if opt == '-h':
-            print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
-            print "Action can be: backup, restore, list"
-            print '  backup: backs up data'
-            print '  restore: restores data'
-            print '  list: lists all backups on S3'
+            printOptions()
             sys.exit()
         elif opt in ("-f", "--folder"):
             sourcefolder = arg
@@ -34,6 +44,8 @@ def main(argv):
             destbucket = arg
         elif opt in ("-a", "--action"):
             action = arg
+        elif opt in ("-c"):
+            confirmAction = False
 
     print 'Source folder: ' + sourcefolder
     print 'Destination bucket: ' + destbucket
@@ -89,6 +101,10 @@ def main(argv):
     password = getConfig("password")
     print "Action: " + action
     print ""
+
+    if confirmAction:
+        raw_input("Press Enter to continue...")
+        print '';
 
     if action == "backup":
         backup.run(sourcefolder, destbucket, temp_folder, password)
