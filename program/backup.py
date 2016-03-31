@@ -2,9 +2,10 @@ import datetime
 import time
 import boto3
 import os
+import tempfile
 from program import encryption as lib
 
-def run(sourcefolder, destbucket, tempfolder, password, backupName):
+def run(sourcefolder, destbucket, password, backupName):
 
     print "Running backup..."
 
@@ -38,12 +39,12 @@ def run(sourcefolder, destbucket, tempfolder, password, backupName):
             metadata += sum + " " + file + "\n"
 
             if sum not in s3files:
-                encfile = tempfolder + "/" + sum
-                with open(file, 'rb') as in_file, open(encfile, 'wb') as out_file:
+                with open(file, 'rb') as in_file, tempfile.SpooledTemporaryFile(max_size=100000000) as out_file:
                     lib.encrypt(in_file, out_file, password)
-                data = open(encfile, 'rb')
-                bucket.put_object(Key=sum, Body=data)
-                os.remove(encfile)
+                    out_file.flush()
+                    out_file.seek(0)
+                    bucket.put_object(Key=sum, Body=out_file)
+
                 print("Uploaded: " + file)
                 anyNewfiles = True
         except:
@@ -59,17 +60,17 @@ def run(sourcefolder, destbucket, tempfolder, password, backupName):
 
         metafile += str(datetime.date.today()) + "_" + str(millis)
 
-        metapath = tempfolder + "/" + metafile
-        text_file = open(metapath, "w")
-        text_file.write(metadata)
-        text_file.close()
+        with tempfile.SpooledTemporaryFile(max_size=100000000) as meta_plain:
+            meta_plain.write(metadata)
+            meta_plain.flush()
+            meta_plain.seek(0)
 
-        encfile = metapath + ".enc"
-        with open(metapath, 'rb') as in_file, open(encfile, 'wb') as out_file:
-            lib.encrypt(in_file, out_file, password)
+            with tempfile.SpooledTemporaryFile(max_size=100000000) as meta_enc:
+                lib.encrypt(meta_plain, meta_enc, password)
+                meta_enc.flush()
+                meta_enc.seek(0)
+                bucket.put_object(Key=metafile, Body=meta_enc)
 
-        data = open(encfile, 'rb')
-        bucket.put_object(Key=metafile, Body=data)
         print("Finished. Uploaded new meta file: " + metafile)
     else :
         print "Finished. No new files to upload."

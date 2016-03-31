@@ -23,7 +23,6 @@ It requires a s3backup.ini config file located in the current working folder or 
 
 ```
 [main]
-tempfolder=/path/of/temp/directory
 password=mypass
 ```
 
@@ -45,10 +44,9 @@ A nice benefit is that all files are deduplicated - i.e. if you have a movie two
 2. Generate MD5 sums of all local files.
 3. Find all MD5 sums which doesn't exist on S3 as files.
 4. For each local file not on S3:
-    1. Encrypt the local file with the supplied password to a temporary file in `tempfolder`.
+    1. Encrypt the local file with the supplied password to a temporary file in memory.
     2. Upload the file to S3 with the MD5 sum as key
-    3. Delete the local encrypted file
-    4. Write a a line to the meta file with`<MD5sum> <filepath>`
+    3. Write a a line to the meta file with`<MD5sum> <filepath>`
 5. Encrypt the meta file
 6. Upload the meta file to S3
 

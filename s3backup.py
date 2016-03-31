@@ -70,7 +70,6 @@ def main(argv):
         print "Sample config:"
         print ""
         print "[main]"
-        print "tempfolder=/place/of/temp/folder"
         print "password=mypass"
         print ""
         sys.exit(0)
@@ -103,7 +102,6 @@ def main(argv):
             print("Missing '" + config + "' in config file")
             sys.exit(0)
 
-    temp_folder = getConfig("tempfolder")
     password = getConfig("password")
     print "Action: " + action
     print ""
@@ -113,7 +111,7 @@ def main(argv):
         print '';
 
     if action == "backup":
-        backup.run(sourcefolder, destbucket, temp_folder, password, backupName)
+        backup.run(sourcefolder, destbucket, password, backupName)
     elif action == "list":
         manage.list(destbucket)
     else:
