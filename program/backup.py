@@ -4,7 +4,7 @@ import boto3
 import os
 from program import encryption as lib
 
-def run(sourcefolder, destbucket, tempfolder, password):
+def run(sourcefolder, destbucket, tempfolder, password, backupName):
 
     print "Running backup..."
 
@@ -51,7 +51,14 @@ def run(sourcefolder, destbucket, tempfolder, password):
 
     if anyNewfiles :
         millis = int(round(time.time() * 1000))
-        metafile = "meta_" + str(datetime.date.today()) + "_" + str(millis)
+
+        metafile = "meta_"
+
+        if backupName != '':
+            metafile += backupName + "_"
+
+        metafile += str(datetime.date.today()) + "_" + str(millis)
+
         metapath = tempfolder + "/" + metafile
         text_file = open(metapath, "w")
         text_file.write(metadata)

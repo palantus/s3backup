@@ -6,6 +6,7 @@ import sys
 import getopt
 from program import backup as backup
 from program import manage as manage
+from program import tools as tools
 
 def printOptions():
     print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
@@ -18,14 +19,17 @@ def printOptions():
     print '                 "restore": restores data'
     print '                 "list": lists all backups on S3'
     print '-c             run action without any prompts (useful for running in cron jobs).'
+    print '-n, --name     a backup name (optional). Will be part of metafile filename'
 
 def main(argv):
     sourcefolder = ""
     destbucket = ""
     action = "";
     confirmAction = True
+    backupName = "";
+
     try:
-        opts, args = getopt.getopt(argv,"hf:b:a:c",["folder=","bucket=","action="])
+        opts, args = getopt.getopt(argv,"hf:b:a:cn:",["folder=","bucket=","action=", "name="])
     except getopt.GetoptError:
         printOptions()
         sys.exit(2)
@@ -46,6 +50,8 @@ def main(argv):
             action = arg
         elif opt in ("-c"):
             confirmAction = False
+        elif opt in ("-n", "--name"):
+            backupName = tools.slugify(arg)
 
     print 'Source folder: ' + sourcefolder
     print 'Destination bucket: ' + destbucket
@@ -107,7 +113,7 @@ def main(argv):
         print '';
 
     if action == "backup":
-        backup.run(sourcefolder, destbucket, temp_folder, password)
+        backup.run(sourcefolder, destbucket, temp_folder, password, backupName)
     elif action == "list":
         manage.list(destbucket)
     else:
