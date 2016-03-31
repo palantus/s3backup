@@ -4,8 +4,8 @@ import os
 import ConfigParser
 import sys
 import getopt
-from lib import backup as backup
-from lib import manage as manage
+from program import backup as backup
+from program import manage as manage
 
 def main(argv):
     sourcefolder = ""
