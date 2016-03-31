@@ -14,7 +14,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hf:b:a:",["folder=","bucket=","action="])
     except getopt.GetoptError:
-        print 'Usage: s3backup.py -f <folder> -b <bucket>'
+        print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
+        print "Action can be: backup, restore, list"
+        print '  backup: backs up data'
+        print '  restore: restores data'
+        print '  list: lists all backups on S3'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
