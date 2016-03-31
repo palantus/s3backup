@@ -19,7 +19,7 @@ Parameters:
 
 It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
 
-```bash
+```
 [main]
 tempfolder=/path/of/temp/directory
 password=mypass
