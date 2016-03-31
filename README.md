@@ -5,13 +5,11 @@ Backs up a folder to an Amazon S3 bucket after encrypting it
 
 `s3backup.py -f <folder> -b <bucket> -a <action>`
 
-It requires a s3backup.ini config file located in the current working folder or the parent.
-
-Sample content:
+It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
 
 ```python
 [main]
-tempfolder=/path/of/source/directory
+tempfolder=/path/of/temp/directory
 password=mypass
 ```
 
