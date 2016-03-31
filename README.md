@@ -1,4 +1,4 @@
-# s3backup
+# Unofficial Amazon S3 Folder Backup Script
 Backs up a folder to an Amazon S3 bucket after encrypting it
 
 ##Usage
