@@ -42,7 +42,7 @@ A nice benefit is that all files are deduplicated - i.e. if you have a movie two
 
 ###Backup
 1. Find all local files and all files currently on S3.
-2. Generates MD5 sums of all local files.
+2. Generate MD5 sums of all local files.
 3. Find all MD5 sums which doesn't exist on S3 as files.
 4. For each local file not on S3:
     1. Encrypt the local file with the supplied password to a temporary file in `tempfolder`.
