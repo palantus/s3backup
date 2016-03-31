@@ -17,6 +17,7 @@ Parameters:
                (useful for running in cron jobs).
 -n, --name     a backup name (optional).
                Will be part of metafile filename
+-s             simulate. No files will be uploaded to S3.
 ```
 
 It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
