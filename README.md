@@ -52,12 +52,12 @@ Full restore functionality hasn't been implemented yet.
 
 However, you can always restore files like this:
 
-1. Download meta file of the relevant backup.
+1. Download meta file of the relevant backup manually from S3. It can be found using `--action list`.
 2. Decrypt it using: `openssl aes-256-cbc -d -in <metafile> -out <outputfile>`. You will be prompted for the password.
 3. Find the files you want to restore from it and note the MD5 sums
 4. Download those files and decrypt them using the same command.
 
-This can easily be scripted using the AWS CLI.
+This can easily be scripted using the AWS CLI while looping through the meta file.
 
 ###List
 Lists all files on S3 starting with `meta_`.
