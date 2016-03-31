@@ -3,7 +3,7 @@ Backs up a folder to an Amazon S3 bucket after encrypting it
 
 ##Usage
 
-```bash
+```
 Usage: s3backup.py -f <folder> -b <bucket> -a <action>
 
 Parameters:
