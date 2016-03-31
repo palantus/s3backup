@@ -3,20 +3,27 @@ Backs up a folder to an Amazon S3 bucket after encrypting it
 
 ##Usage
 
-`s3backup.py -f <folder> -b <bucket> -a <action>`
+```bash
+Usage: s3backup.py -f <folder> -b <bucket> -a <action>
+
+Parameters:
+-f, --folder   source folder to back up
+-b, --bucket   S3 bucket to back up to
+-a, --action   action to perform:
+                 "backup": backs up data
+                 "restore": restores data
+                 "list": lists all backups on S3
+-c             run action without any prompts
+               (useful for running in cron jobs).
+```
 
 It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
 
-```python
+```bash
 [main]
 tempfolder=/path/of/temp/directory
 password=mypass
 ```
-
-`action` can be:
-  * `backup`: backs up all files in source directory (recursive) to the S3 bucket specified as argument.
-  * `restore`
-  * `list`: lists all backups currently on S3
 
 ##How does it work?
 
