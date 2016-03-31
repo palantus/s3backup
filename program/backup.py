@@ -5,7 +5,7 @@ import os
 import tempfile
 from program import encryption as lib
 
-def run(sourcefolder, destbucket, password, backupName, simulate):
+def run(sourcefolder, destbucket, password, backupName, simulate, delete):
 
     print "Running backup..."
     starttime = int(round(time.time() * 1000));
@@ -30,22 +30,27 @@ def run(sourcefolder, destbucket, password, backupName, simulate):
 
     print "Found " + str(len(localFiles)) + " files in source directory"
     print "Iterating through local files and finding differences..."
+    print ''
 
     metadata = ""
     anyNewfiles = False
+    localFilesMD5 = set()
+    uploadedFiles = set()
 
     for file in localFiles:
         try:
             sum = lib.md5file(file)
             metadata += sum + " " + file + "\n"
+            localFilesMD5.add(sum)
 
             if sum not in s3files:
                 with open(file, 'rb') as in_file, tempfile.SpooledTemporaryFile(max_size=100000000) as out_file:
                     lib.encrypt(in_file, out_file, password)
                     out_file.flush()
                     out_file.seek(0)
-                    if not simulate:
+                    if not simulate and not sum in uploadedFiles:
                         bucket.put_object(Key=sum, Body=out_file)
+                        uploadedFiles.add(sum)
 
                 print("Uploaded: " + file)
                 anyNewfiles = True
@@ -74,14 +79,47 @@ def run(sourcefolder, destbucket, password, backupName, simulate):
                 if not simulate:
                     bucket.put_object(Key=metafile, Body=meta_enc)
 
-        print("Finished. Uploaded new meta file: " + metafile)
+        print ''
+        print("Finished uploading files. Uploaded new meta file: " + metafile)
+
     else :
-        print "Finished. No new files to upload."
+        print "Finished uploading files. No new files uploaded."
+
+
+    if delete:
+        print ''
+        print "Looking for files deleted locally and deleting them on S3..."
+
+        filesToDelete = s3files.difference(localFilesMD5)
+        foundAny = False
+
+        for file in filesToDelete:
+            if not file.startswith('meta_'):
+                print "Deleting file " + file + " + on S3"
+                foundAny = True
+
+                bucket.delete_objects(
+                    Delete={
+                        'Objects': [
+                            {
+                                'Key': file
+                            },
+                        ],
+                        'Quiet': True
+                    }
+                )
+
+        if foundAny:
+            print "Finished"
+        else:
+            print "Finished. No files found."
+
+    print ''
 
     endtime = int(round(time.time() * 1000));
     diffsec = int(round((endtime-starttime)/1000));
 
     if diffsec >= 120:
-        print "Time used: " + str(int(round(diffsec/60))) + " minutes"
+        print "Finished! Time used: " + str(int(round(diffsec/60))) + " minutes"
     else:
-        print "Time used: " + str(diffsec) + " seconds"
+        print "Finished! Time used: " + str(diffsec) + " seconds"

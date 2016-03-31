@@ -29,9 +29,10 @@ def main(argv):
     confirmAction = True
     backupName = "";
     simulate = False
+    delete = False
 
     try:
-        opts, args = getopt.getopt(argv,"hf:b:a:cn:s",["folder=","bucket=","action=", "name="])
+        opts, args = getopt.getopt(argv,"hf:b:a:cn:sd",["folder=","bucket=","action=", "name="])
     except getopt.GetoptError:
         printOptions()
         sys.exit(2)
@@ -54,6 +55,9 @@ def main(argv):
             confirmAction = False
         elif opt in ("-s"):
             simulate = True
+        elif opt in ("-d"):
+            delete = True
+
 
         elif opt in ("-n", "--name"):
             backupName = tools.slugify(arg)
@@ -115,6 +119,9 @@ def main(argv):
     if simulate:
         print 'Simulation: Yes. No files will be sent to S3.'
 
+    if delete:
+        print 'Delete: Yes. Files deleted locally will also be deleted on S3!'
+
     print "Action: " + action
     print ""
 
@@ -123,7 +130,7 @@ def main(argv):
         print '';
 
     if action == "backup":
-        backup.run(sourcefolder, destbucket, password, backupName, simulate)
+        backup.run(sourcefolder, destbucket, password, backupName, simulate, delete)
     elif action == "list":
         manage.list(destbucket)
     else:
