@@ -5,6 +5,7 @@ import ConfigParser
 import sys
 import getopt
 from lib import backup as backup
+from lib import manage as manage
 
 def main(argv):
     sourcefolder = ""
@@ -80,8 +81,6 @@ def main(argv):
             print("Missing '" + config + "' in config file")
             sys.exit(0)
 
-
-    #config
     temp_folder = getConfig("tempfolder")
     password = getConfig("password")
     print "Action: " + action
@@ -89,10 +88,10 @@ def main(argv):
 
     if action == "backup":
         backup.run(sourcefolder, destbucket, temp_folder, password)
+    elif action == "list":
+        manage.list(destbucket)
     else:
         print "No action provided or unknown action"
-
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
