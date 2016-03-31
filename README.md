@@ -15,6 +15,8 @@ Parameters:
                  "list": lists all backups on S3
 -c             run action without any prompts
                (useful for running in cron jobs).
+-n, --name     a backup name (optional).
+               Will be part of metafile filename
 ```
 
 It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
