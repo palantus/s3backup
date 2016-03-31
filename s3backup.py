@@ -1,30 +1,35 @@
 #!/usr/bin/python
 
 import os
-import boto3
-import encryptionlib as lib
-import datetime
-import time
 import ConfigParser
 import sys
 import getopt
+from lib import backup as backup
 
 def main(argv):
     sourcefolder = ""
     destbucket = ""
+    action = "";
     try:
-        opts, args = getopt.getopt(argv,"hf:b:",["folder=","bucket="])
+        opts, args = getopt.getopt(argv,"hf:b:a:",["folder=","bucket=","action="])
     except getopt.GetoptError:
         print 'Usage: s3backup.py -f <folder> -b <bucket>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'Usage: s3backup.py -f <folder> -b <bucket>'
+            print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
+            print "Action can be: backup, restore, list"
+            print '  backup: backs up data'
+            print '  restore: restores data'
+            print '  list: lists all backups on S3'
             sys.exit()
         elif opt in ("-f", "--folder"):
             sourcefolder = arg
         elif opt in ("-b", "--bucket"):
             destbucket = arg
+        elif opt in ("-a", "--action"):
+            action = arg
+
     print 'Source folder: ' + sourcefolder
     print 'Destination bucket: ' + destbucket
 
@@ -36,8 +41,8 @@ def main(argv):
         print "No bucket provided"
         sys.exit(0)
 
-    if not os.path.isfile("../s3backup.ini"):
-        print "Missing config file ../s3backup.ini"
+    if not os.path.isfile("../s3backup.ini") and not os.path.isfile("s3backup.ini"):
+        print "Missing config file s3backup.ini"
 
         print "Sample config:"
         print ""
@@ -61,7 +66,10 @@ def main(argv):
         return dict1
 
     Config = ConfigParser.ConfigParser()
-    Config.read("../s3backup.ini")
+    if os.path.isfile("s3backup.ini"):
+        Config.read("s3backup.ini")
+    else:
+        Config.read("../s3backup.ini")
 
     def getConfig(config):
         try:
@@ -76,58 +84,15 @@ def main(argv):
     #config
     temp_folder = getConfig("tempfolder")
     password = getConfig("password")
+    print "Action: " + action
     print ""
 
-    #Run the backup
-    s3 = boto3.resource('s3')
+    if action == "backup":
+        backup.run(sourcefolder, destbucket, temp_folder, password)
+    else:
+        print "No action provided or unknown action"
 
-    s3files = set()
-    bucket = s3.Bucket(destbucket)
-    for obj in bucket.objects.all():
-        s3files.add(obj.key)
 
-    localFiles = []
-    for root, dirnames, filenames in os.walk(sourcefolder):
-        for filename in filenames:
-            localFiles.append(os.path.join(root, filename))
-
-    metadata = ""
-    anyNewfiles = False
-
-    for file in localFiles:
-        try:
-            sum = lib.md5file(file)
-            metadata += sum + " " + file + "\n"
-
-            if sum not in s3files:
-                encfile = temp_folder + "/" + sum
-                with open(file, 'rb') as in_file, open(encfile, 'wb') as out_file:
-                    lib.encrypt(in_file, out_file, password)
-                data = open(encfile, 'rb')
-                bucket.put_object(Key=sum, Body=data)
-                os.remove(encfile)
-                print("Uploaded: " + file)
-                anyNewfiles = True
-        except:
-            print "Warning: Could not read file: " + file
-
-    if anyNewfiles :
-        millis = int(round(time.time() * 1000))
-        metafile = "meta_" + str(datetime.date.today()) + "_" + str(millis)
-        metapath = temp_folder + "/" + metafile
-        text_file = open(metapath, "w")
-        text_file.write(metadata)
-        text_file.close()
-
-        encfile = metapath + ".enc"
-        with open(metapath, 'rb') as in_file, open(encfile, 'wb') as out_file:
-            lib.encrypt(in_file, out_file, password)
-
-        data = open(encfile, 'rb')
-        bucket.put_object(Key=metafile, Body=data)
-        print("Finished. Uploaded new meta file: " + metafile)
-    else :
-        print "Finished. No new files to upload."
 
 if __name__ == "__main__":
     main(sys.argv[1:])
