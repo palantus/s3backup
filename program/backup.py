@@ -34,6 +34,7 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
 
     metadata = ""
     anyNewfiles = False
+    anyDeletedFiles = False
     localFilesMD5 = set()
     uploadedFiles = set()
 
@@ -57,7 +58,42 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
         except:
             print "Warning: Could not read file: " + file
 
-    if anyNewfiles :
+    if anyNewfiles:
+        print ''
+        print "Finished uploading files."
+    else:
+        print "Finished."
+
+    if delete:
+        print ''
+        print "Looking for files deleted locally and deleting them on S3..."
+        print ''
+
+        filesToDelete = s3files.difference(localFilesMD5)
+
+        for file in filesToDelete:
+            if not file.startswith('meta_'):
+                print "Deleting file " + file + " + on S3"
+                anyDeletedFiles = True
+
+                bucket.delete_objects(
+                    Delete={
+                        'Objects': [
+                            {
+                                'Key': file
+                            },
+                        ],
+                        'Quiet': True
+                    }
+                )
+
+        if anyDeletedFiles:
+            print ''
+            print "Finished deleting files."
+        else:
+            print "Finished. No files found."
+
+    if anyNewfiles or anyDeletedFiles:
         millis = int(round(time.time() * 1000))
 
         metafile = "meta_"
@@ -80,39 +116,10 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
                     bucket.put_object(Key=metafile, Body=meta_enc)
 
         print ''
-        print("Finished uploading files. Uploaded new meta file: " + metafile)
+        print("Finished creating and uploading new meta file: " + metafile)
 
     else :
-        print "Finished uploading files. No new files uploaded."
-
-
-    if delete:
-        print ''
-        print "Looking for files deleted locally and deleting them on S3..."
-
-        filesToDelete = s3files.difference(localFilesMD5)
-        foundAny = False
-
-        for file in filesToDelete:
-            if not file.startswith('meta_'):
-                print "Deleting file " + file + " + on S3"
-                foundAny = True
-
-                bucket.delete_objects(
-                    Delete={
-                        'Objects': [
-                            {
-                                'Key': file
-                            },
-                        ],
-                        'Quiet': True
-                    }
-                )
-
-        if foundAny:
-            print "Finished"
-        else:
-            print "Finished. No files found."
+        print "No new meta file created."
 
     print ''
 
