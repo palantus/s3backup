@@ -8,6 +8,7 @@ from program import encryption as lib
 def run(sourcefolder, destbucket, password, backupName, simulate):
 
     print "Running backup..."
+    starttime = int(round(time.time() * 1000));
 
     #Run the backup
     s3 = boto3.resource('s3')
@@ -76,3 +77,11 @@ def run(sourcefolder, destbucket, password, backupName, simulate):
         print("Finished. Uploaded new meta file: " + metafile)
     else :
         print "Finished. No new files to upload."
+
+    endtime = int(round(time.time() * 1000));
+    diffsec = int(round((endtime-starttime)/1000));
+
+    if diffsec >= 120:
+        print "Time used: " + str(int(round(diffsec/60))) + " minutes"
+    else:
+        print "Time used: " + str(diffsec) + " seconds"
