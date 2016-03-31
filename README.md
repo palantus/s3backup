@@ -30,6 +30,7 @@ password=mypass
 ##How does it work?
 
 My main goal is to NOT be dependant on some 3rd party tool (like this), so all files can always be restored using standard Linux functionality (like a shell script with openssl).
+Additionally, it is important to note that the source directory is completely untouched (ie. it can be mounted read-only!).
 
 When the backup is finished the following files will be in the S3 bucket:
   * All source files named as MD5 sums (no folders)
@@ -43,11 +44,13 @@ A nice benefit is that all files are deduplicated - i.e. if you have a movie two
 1. Find all local files and all files currently on S3.
 2. Generates MD5 sums of all local files.
 3. Find all MD5 sums which doesn't exist on S3 as files.
-4. Encrypt the local files with the supplied password
-5. Upload the files to S3 with the MD5 sum as key
-6. Write a meta file which has one line of `<MD5sum> <filepath>` for each file
-7. Encrypt the meta file
-8. Upload the meta file to S3
+4. For each local file not on S3:
+    1. Encrypt the local file with the supplied password to a temporary file in `tempfolder`.
+    2. Upload the file to S3 with the MD5 sum as key
+    3. Delete the local encrypted file
+    4. Write a a line to the meta file with`<MD5sum> <filepath>`
+5. Encrypt the meta file
+6. Upload the meta file to S3
 
 ###Restore
 Full restore functionality hasn't been implemented yet.
