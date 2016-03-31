@@ -95,18 +95,21 @@ def main(argv):
     anyNewfiles = False
 
     for file in localFiles:
-        sum = lib.md5file(file)
-        metadata += sum + " " + file + "\n"
+        try:
+            sum = lib.md5file(file)
+            metadata += sum + " " + file + "\n"
 
-        if sum not in s3files:
-            encfile = temp_folder + "/" + sum
-            with open(file, 'rb') as in_file, open(encfile, 'wb') as out_file:
-                lib.encrypt(in_file, out_file, password)
-            data = open(encfile, 'rb')
-            bucket.put_object(Key=sum, Body=data)
-            os.remove(encfile)
-            print("Uploaded: " + file)
-            anyNewfiles = True
+            if sum not in s3files:
+                encfile = temp_folder + "/" + sum
+                with open(file, 'rb') as in_file, open(encfile, 'wb') as out_file:
+                    lib.encrypt(in_file, out_file, password)
+                data = open(encfile, 'rb')
+                bucket.put_object(Key=sum, Body=data)
+                os.remove(encfile)
+                print("Uploaded: " + file)
+                anyNewfiles = True
+        except:
+            print "Warning: Could not read file: " + file
 
     if anyNewfiles :
         millis = int(round(time.time() * 1000))
