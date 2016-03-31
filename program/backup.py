@@ -5,7 +5,7 @@ import os
 import tempfile
 from program import encryption as lib
 
-def run(sourcefolder, destbucket, password, backupName):
+def run(sourcefolder, destbucket, password, backupName, simulate):
 
     print "Running backup..."
 
@@ -43,7 +43,8 @@ def run(sourcefolder, destbucket, password, backupName):
                     lib.encrypt(in_file, out_file, password)
                     out_file.flush()
                     out_file.seek(0)
-                    bucket.put_object(Key=sum, Body=out_file)
+                    if not simulate:
+                        bucket.put_object(Key=sum, Body=out_file)
 
                 print("Uploaded: " + file)
                 anyNewfiles = True
@@ -69,7 +70,8 @@ def run(sourcefolder, destbucket, password, backupName):
                 lib.encrypt(meta_plain, meta_enc, password)
                 meta_enc.flush()
                 meta_enc.seek(0)
-                bucket.put_object(Key=metafile, Body=meta_enc)
+                if not simulate:
+                    bucket.put_object(Key=metafile, Body=meta_enc)
 
         print("Finished. Uploaded new meta file: " + metafile)
     else :

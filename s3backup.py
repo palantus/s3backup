@@ -20,6 +20,7 @@ def printOptions():
     print '                 "list": lists all backups on S3'
     print '-c             run action without any prompts (useful for running in cron jobs).'
     print '-n, --name     a backup name (optional). Will be part of metafile filename'
+    print '-s             simulate. No files will be uploaded to S3.'
 
 def main(argv):
     sourcefolder = ""
@@ -27,9 +28,10 @@ def main(argv):
     action = "";
     confirmAction = True
     backupName = "";
+    simulate = False
 
     try:
-        opts, args = getopt.getopt(argv,"hf:b:a:cn:",["folder=","bucket=","action=", "name="])
+        opts, args = getopt.getopt(argv,"hf:b:a:cn:s",["folder=","bucket=","action=", "name="])
     except getopt.GetoptError:
         printOptions()
         sys.exit(2)
@@ -50,6 +52,9 @@ def main(argv):
             action = arg
         elif opt in ("-c"):
             confirmAction = False
+        elif opt in ("-s"):
+            simulate = True
+
         elif opt in ("-n", "--name"):
             backupName = tools.slugify(arg)
 
@@ -103,6 +108,13 @@ def main(argv):
             sys.exit(0)
 
     password = getConfig("password")
+
+    if backupName != "":
+        print 'Backup name: ' + backupName
+
+    if simulate:
+        print 'Simulation: Yes. No files will be sent to S3.'
+
     print "Action: " + action
     print ""
 
@@ -111,7 +123,7 @@ def main(argv):
         print '';
 
     if action == "backup":
-        backup.run(sourcefolder, destbucket, password, backupName)
+        backup.run(sourcefolder, destbucket, password, backupName, simulate)
     elif action == "list":
         manage.list(destbucket)
     else:
