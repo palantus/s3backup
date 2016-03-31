@@ -15,7 +15,7 @@ tempfolder=/path/of/source/directory
 password=mypass
 ```
 
-Action can be:
+`action` can be:
   * `backup`: backs up all files in source directory (recursive) to the S3 bucket specified as argument.
   * `restore`
   * `list`: lists all backups currently on S3
