@@ -51,6 +51,7 @@ A nice benefit is that all files are deduplicated - i.e. if you have a movie two
 Full restore functionality hasn't been implemented yet.
 
 However, you can always restore files like this:
+
 1. Download meta file of the relevant backup.
 2. Decrypt it using: `openssl aes-256-cbc -d -in <metafile> -out <outputfile>`. You will be prompted for the password.
 3. Find the files you want to restore from it and note the MD5 sums
