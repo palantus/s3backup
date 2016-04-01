@@ -5,6 +5,7 @@ import ConfigParser
 import sys
 import getopt
 from program import backup as backup
+from program import restore as restore
 from program import manage as manage
 from program import tools as tools
 
@@ -12,8 +13,8 @@ def printOptions():
     print 'Usage: s3backup.py -f <folder> -b <bucket> -a <action>'
     print ''
     print 'Parameters:'
-    print '-f, --folder   source folder to back up'
-    print '-b, --bucket   S3 bucket to back up to'
+    print '-f, --folder   source folder to backup and dest folder for restore'
+    print '-b, --bucket   S3 bucket to back up to and to restore from'
     print '-a, --action   action to perform:'
     print '                 "backup": backs up data'
     print '                 "restore": restores data'
@@ -21,18 +22,20 @@ def printOptions():
     print '-c             run action without any prompts (useful for running in cron jobs).'
     print '-n, --name     a backup name (optional). Will be part of metafile filename'
     print '-s             simulate. No files will be uploaded to S3.'
+    print '-m, --meta     meta file name from which the backup will be restored'
 
 def main(argv):
-    sourcefolder = ""
-    destbucket = ""
+    folder = ""
+    bucket = ""
     action = "";
+    metafilename = "";
     confirmAction = True
     backupName = "";
     simulate = False
     delete = False
 
     try:
-        opts, args = getopt.getopt(argv,"hf:b:a:cn:sd",["folder=","bucket=","action=", "name="])
+        opts, args = getopt.getopt(argv,"hf:b:a:cn:sdm:",["folder=","bucket=","action=", "name=", "meta="])
     except getopt.GetoptError:
         printOptions()
         sys.exit(2)
@@ -46,11 +49,13 @@ def main(argv):
             printOptions()
             sys.exit()
         elif opt in ("-f", "--folder"):
-            sourcefolder = arg
+            folder = arg
         elif opt in ("-b", "--bucket"):
-            destbucket = arg
+            bucket = arg
         elif opt in ("-a", "--action"):
             action = arg
+        elif opt in ("-m", "--meta"):
+            metafilename = arg
         elif opt in ("-c"):
             confirmAction = False
         elif opt in ("-s"):
@@ -62,14 +67,14 @@ def main(argv):
         elif opt in ("-n", "--name"):
             backupName = tools.slugify(arg)
 
-    print 'Source folder: ' + sourcefolder
-    print 'Destination bucket: ' + destbucket
+    print 'Source folder: ' + folder
+    print 'Destination bucket: ' + bucket
 
-    if not os.path.isdir(sourcefolder):
+    if not os.path.isdir(folder):
         print "Source folder doesn't exist"
         sys.exit(0)
 
-    if len(destbucket) == 0:
+    if len(bucket) == 0:
         print "No bucket provided"
         sys.exit(0)
 
@@ -116,6 +121,9 @@ def main(argv):
     if backupName != "":
         print 'Backup name: ' + backupName
 
+    if action == "restore":
+        print 'Meta file to restore: ' + metafilename
+
     if simulate:
         print 'Simulation: Yes. No files will be sent to S3.'
 
@@ -130,9 +138,11 @@ def main(argv):
         print '';
 
     if action == "backup":
-        backup.run(sourcefolder, destbucket, password, backupName, simulate, delete)
+        backup.run(folder, bucket, password, backupName, simulate, delete)
+    elif action == "restore":
+        restore.run(folder, bucket, password, metafilename, simulate, delete)
     elif action == "list":
-        manage.list(destbucket)
+        manage.list(bucket)
     else:
         print "No action provided or unknown action"
 

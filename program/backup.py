@@ -7,6 +7,10 @@ from program import encryption as lib
 
 def run(sourcefolder, destbucket, password, backupName, simulate, delete):
 
+    # Remove / in the end of path if given
+    if sourcefolder.endswith("/"):
+        sourcefolder = sourcefolder[:sourcefolder.rfind('/')]
+
     print "Running backup..."
     starttime = int(round(time.time() * 1000));
 
@@ -41,7 +45,7 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
     for file in localFiles:
         try:
             sum = lib.md5file(file)
-            metadata += sum + " " + file + "\n"
+            metadata += sum + " " + file.replace(sourcefolder + "/", "", 1) + "\n"
             localFilesMD5.add(sum)
 
             if sum not in s3files:
