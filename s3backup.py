@@ -4,6 +4,8 @@ import os
 import ConfigParser
 import sys
 import getopt
+import time
+import datetime
 from program import backup as backup
 from program import restore as restore
 from program import manage as manage
@@ -147,4 +149,14 @@ def main(argv):
         print "No action provided or unknown action"
 
 if __name__ == "__main__":
+
+    st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    print "Starting at: " + st
+    print ''
+
     main(sys.argv[1:])
+
+    st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    print ''
+    print "Finished at: " + st
+    print ''
