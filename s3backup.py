@@ -87,7 +87,6 @@ def main(argv):
         print ""
         print "[main]"
         print "password=mypass"
-        print ""
         sys.exit(0)
 
     def ConfigSectionMap(section):
@@ -133,9 +132,9 @@ def main(argv):
         print 'Delete: Yes. Files deleted locally will also be deleted on S3!'
 
     print "Action: " + action
-    print ""
 
     if confirmAction:
+        print '';
         raw_input("Press Enter to continue...")
         print '';
 
@@ -151,12 +150,9 @@ def main(argv):
 if __name__ == "__main__":
 
     st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    print "Starting at: " + st
-    print ''
+    print " ---- Starting at: " + st + " ---- "
 
     main(sys.argv[1:])
 
     st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    print ''
-    print "Finished at: " + st
-    print ''
+    print " ---- Finished at: " + st + " ---- "

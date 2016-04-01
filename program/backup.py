@@ -34,7 +34,6 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
 
     print "Found " + str(len(localFiles)) + " files in source directory"
     print "Iterating through local files and finding differences..."
-    print ''
 
     metadata = ""
     anyNewfiles = False
@@ -57,27 +56,24 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
                         bucket.put_object(Key=sum, Body=out_file)
                         uploadedFiles.add(sum)
 
-                print("Uploaded: " + file)
+                print("  Uploaded: " + file)
                 anyNewfiles = True
         except:
-            print "Warning: Could not read file: " + file
+            print "  Warning: Could not read file: " + file
 
     if anyNewfiles:
-        print ''
         print "Finished uploading files."
     else:
         print "Finished."
 
     if delete:
-        print ''
         print "Looking for files deleted locally and deleting them on S3..."
-        print ''
 
         filesToDelete = s3files.difference(localFilesMD5)
 
         for file in filesToDelete:
             if not file.startswith('meta_'):
-                print "Deleting file " + file + " + on S3"
+                print "  Deleting file " + file + " on S3"
                 anyDeletedFiles = True
 
                 bucket.delete_objects(
@@ -92,7 +88,6 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
                 )
 
         if anyDeletedFiles:
-            print ''
             print "Finished deleting files."
         else:
             print "Finished. No files found."
@@ -119,18 +114,15 @@ def run(sourcefolder, destbucket, password, backupName, simulate, delete):
                 if not simulate:
                     bucket.put_object(Key=metafile, Body=meta_enc)
 
-        print ''
         print("Finished creating and uploading new meta file: " + metafile)
 
     else :
         print "No new meta file created."
 
-    print ''
-
     endtime = int(round(time.time() * 1000));
     diffsec = int(round((endtime-starttime)/1000));
 
     if diffsec >= 120:
-        print "Finished! Time used: " + str(int(round(diffsec/60))) + " minutes"
+        print "Finished backup! Time used: " + str(int(round(diffsec/60))) + " minutes"
     else:
-        print "Finished! Time used: " + str(diffsec) + " seconds"
+        print "Finished backup! Time used: " + str(diffsec) + " seconds"
