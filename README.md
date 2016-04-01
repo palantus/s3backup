@@ -18,6 +18,7 @@ Parameters:
 -n, --name     a backup name (optional).
                Will be part of metafile filename
 -s             simulate. No files will be uploaded to S3.
+-m, --meta     meta file name from which the backup will be restored
 ```
 
 It requires a s3backup.ini config file located in the current working folder or the parent with content like this:
@@ -52,9 +53,15 @@ A nice benefit is that all files are deduplicated - i.e. if you have a movie two
 6. Upload the meta file to S3
 
 ###Restore
-Full restore functionality hasn't been implemented yet.
 
-However, you can always restore files like this:
+
+####Automatic
+
+Is implemented and works. TBD.
+
+####Manual
+
+You can always restore files like this:
 
 1. Download meta file of the relevant backup manually from S3. It can be found using `--action list`.
 2. Decrypt it using: `openssl aes-256-cbc -d -in <metafile> -out <outputfile>`. You will be prompted for the password.
